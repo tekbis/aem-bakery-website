@@ -1,0 +1,172 @@
+/* Homepage hero — 3D depth layer.
+   Sits on top of hero.css (the original hero, unchanged). Adds:
+   pointer tilt of the bake, a 3D turn between slides, and a ground shadow.
+   */
+
+.hero-3d{--mx:0;--my:0;--sy:0}
+.hero-3d .signature-orbit{perspective:1100px;perspective-origin:50% 42%}
+.hero-3d .hero-stage{position:absolute;inset:0;transform-style:preserve-3d;transform:rotateX(calc(var(--my) * -7deg + var(--sy) * 16deg)) rotateY(calc(var(--mx) * 10deg)) translate3d(0,calc(var(--sy) * 40px),calc(var(--sy) * -120px));will-change:transform}
+.hero-3d .hero-products{transform-style:preserve-3d}
+
+/* 3D slide turn: bakes swing in from the right and out to the left (reversed when going back) */
+.hero-3d .hero-products .hero-product{transform:translate3d(16%,3%,-240px) rotateY(-42deg) scale(.88);transition:opacity .75s ease,transform 1.15s cubic-bezier(.2,.8,.2,1),filter .8s ease;backface-visibility:hidden}
+.hero-3d .hero-products .hero-product.active{transform:translate3d(calc(var(--mx) * 10px),calc(var(--my) * 8px),50px) rotateY(0) scale(1);filter:drop-shadow(calc(var(--mx) * -18px) calc(26px + var(--my) * -10px) 20px rgba(60,40,20,.2))}
+.hero-3d .hero-products .hero-product.leaving{transform:translate3d(-16%,3%,-240px) rotateY(42deg) scale(.88)}
+.hero-3d.backward .hero-products .hero-product:not(.active):not(.leaving){transform:translate3d(-16%,3%,-240px) rotateY(42deg) scale(.88)}
+.hero-3d.backward .hero-products .hero-product.leaving{transform:translate3d(16%,3%,-240px) rotateY(-42deg) scale(.88)}
+
+/* ground shadow — makes the bake sit on a surface */
+.hero-plate{position:absolute;left:20%;right:20%;bottom:2%;height:13%;border-radius:50%;background:radial-gradient(closest-side,rgba(23,58,94,.30),rgba(23,58,94,.12) 55%,transparent);filter:blur(8px);transform:translate3d(calc(var(--mx) * -22px),0,-20px) scaleX(calc(1 + var(--my) * .04));pointer-events:none}
+
+/* arc + labels lift slightly with the tilt for parallax against the bake */
+.hero-3d .arc-lines{transform:translate3d(calc(var(--mx) * 6px),calc(var(--my) * 4px),0);transition:none}
+
+@media(max-width:700px){
+  .hero-3d .hero-products .hero-product{transform:translate3d(18%,2%,-160px) rotateY(-36deg) scale(.9)}
+  .hero-3d .hero-products .hero-product.leaving,.hero-3d.backward .hero-products .hero-product:not(.active):not(.leaving){transform:translate3d(-18%,2%,-160px) rotateY(36deg) scale(.9)}
+  .hero-3d.backward .hero-products .hero-product.leaving{transform:translate3d(18%,2%,-160px) rotateY(-36deg) scale(.9)}
+}
+@media(prefers-reduced-motion:reduce){
+  .hero-3d .hero-stage{transform:none!important;animation:none!important}
+  .hero-3d .hero-products .hero-product{transform:none!important;transition:opacity .3s!important}
+}
+
+/* ---------- bigger, standout hero heading (v3) ---------- */
+.hero.hero-minimal.hero-3d h1{font-family:'Fraunces',Georgia,serif;font-weight:700;font-variation-settings:'SOFT' 100,'WONK' 0;font-size:clamp(58px,6.8vw,108px);line-height:.94;letter-spacing:-.035em;margin:0 0 14px;color:#173a5e}
+.hero-3d .minimal-heading>p:first-child{font-size:11px;letter-spacing:2.4px;font-weight:600;color:#3d6588;margin-bottom:14px}
+.hero-3d .minimal-description{font-size:16px;color:#3d5a72}
+.hero.hero-minimal.hero-3d{height:860px}
+.hero-3d .signature-orbit{margin-top:36px}
+.hero-3d #prev,.hero-3d #next{margin-top:36px}
+.hero-3d .minimal-product{bottom:46px}
+.hero-3d .minimal-product h2{font-size:22px}
+@media(max-width:1100px) and (min-width:701px){
+  .hero.hero-minimal.hero-3d{height:880px}
+  .hero.hero-minimal.hero-3d h1{font-size:clamp(56px,8vw,84px)}
+  .hero-3d .signature-orbit{margin-top:60px}
+}
+@media(max-width:700px){
+  .hero.hero-minimal.hero-3d{height:max(740px,calc(100svh - 76px));max-height:820px}
+  .hero-3d .hero-products{height:236px!important;top:104px!important}
+  .hero-3d #prev,.hero-3d #next{margin-top:-78px}
+  .hero-3d .minimal-heading{top:44px}
+  .hero-3d .minimal-heading>p:first-child{font-size:9.5px;letter-spacing:1.8px;margin-bottom:12px}
+  .hero.hero-minimal.hero-3d h1{font-size:clamp(46px,13.5vw,60px);line-height:.92;margin-bottom:12px}
+  .hero.hero-minimal.hero-3d h1{text-wrap:balance}
+  .hero-3d .minimal-description{font-size:14px;max-width:300px;min-height:44px}
+  .hero-3d .signature-orbit{margin-top:14px}
+  .hero-3d .minimal-product{bottom:58px}
+  .hero-3d .minimal-product h2{font-size:18px}
+  .hero-3d .minimal-product .button{min-height:50px}
+  .hero-3d .hero-scroll{bottom:16px}
+}
+@media(max-width:380px){
+  .hero.hero-minimal.hero-3d h1{font-size:44px}
+  .hero-3d .signature-orbit{margin-top:10px}
+  .hero-3d .hero-products{height:220px!important}
+}
+/* heading entrance */
+@media(prefers-reduced-motion:no-preference){
+  .hero-3d h1{animation:hero-title .9s cubic-bezier(.22,1,.36,1) both .05s}
+  @keyframes hero-title{from{opacity:0;transform:translateY(22px) scale(.98);filter:blur(4px)}to{opacity:1;transform:none;filter:none}}
+}
+
+/* ---------- v4: hero text in the logo's dark blue, bigger + modern labels ---------- */
+.hero-3d{--logo-navy:#143a6b}
+.hero.hero-minimal.hero-3d h1{color:var(--logo-navy)}
+.hero-3d .minimal-heading>p:first-child{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:700;letter-spacing:3px;color:var(--logo-navy);display:inline-flex;align-items:center;gap:12px;opacity:1}
+.hero-3d .minimal-heading>p:first-child::before,.hero-3d .minimal-heading>p:first-child::after{content:'';width:28px;height:2px;border-radius:2px;background:#f0b955}
+.hero-3d .minimal-description{font-size:clamp(17px,1.5vw,21px);font-weight:500;color:var(--logo-navy);max-width:640px;line-height:1.5}
+
+/* bake labels around the arc: pill chips with hover */
+.hero-3d .orbit-label{width:auto!important;padding:9px 16px!important;border-radius:999px;background:rgba(255,255,255,.55);border:1px solid rgba(20,58,107,.14);color:var(--logo-navy)!important;opacity:1!important;font-size:13px!important;font-weight:600!important;letter-spacing:.2px!important;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);transition:background .3s,color .3s,box-shadow .3s,scale .3s cubic-bezier(.22,1,.36,1)!important;white-space:nowrap}
+.hero-3d .orbit-label:hover{background:#fff;box-shadow:0 10px 24px -12px rgba(20,58,107,.5);scale:1.08}
+.hero-3d .orbit-label.selected{background:var(--logo-navy);color:#fff!important;border-color:var(--logo-navy);box-shadow:0 10px 24px -10px rgba(20,58,107,.6)}
+
+/* product name + price */
+.hero-3d .minimal-product h2{font-family:'Fraunces',Georgia,serif!important;font-weight:650!important;font-variation-settings:'SOFT' 100;font-size:clamp(22px,2vw,30px)!important;letter-spacing:-.01em!important;color:var(--logo-navy)!important;transition:color .3s}
+.hero-3d .minimal-divider{display:none}
+.hero-3d .minimal-product strong{display:inline-grid;place-items:center;min-width:64px;height:38px;padding:0 14px;border-radius:999px;background:#f4d58d;color:#0f2944;font-weight:700;font-size:18px;box-shadow:0 8px 18px -10px rgba(20,58,107,.5);transition:transform .35s cubic-bezier(.22,1,.36,1)}
+.hero-3d .minimal-product-line{gap:14px}
+.hero-3d .minimal-product:hover strong{transform:rotate(-4deg) scale(1.06)}
+.hero-3d .minimal-product .button{background:var(--logo-navy);box-shadow:0 14px 28px -14px rgba(20,58,107,.7)}
+.hero-3d .minimal-product .button:hover{background:#0f2944}
+.hero-3d .hero-product.active{cursor:pointer}
+@media(max-width:700px){
+  .hero-3d .minimal-heading>p:first-child{font-size:10.5px;letter-spacing:2px;gap:8px}
+  .hero-3d .minimal-heading>p:first-child::before,.hero-3d .minimal-heading>p:first-child::after{width:16px}
+  .hero-3d .minimal-description{font-size:16px}
+  .hero-3d .orbit-label{padding:6px 11px!important;font-size:11px!important}
+  .hero-3d .minimal-product h2{font-size:20px!important}
+  .hero-3d .minimal-product strong{height:32px;font-size:15px;min-width:52px}
+}
+
+/* phones: bake labels become one centred row of chips above the arc */
+@media(max-width:700px){
+  .hero-3d .signature-orbit{margin-top:40px}
+  .hero-3d .orbit-pointer{display:none}
+  .hero-3d .orbit-label{top:14px!important;left:50%!important;right:auto!important;transform:none!important}
+  .hero-3d .orbit-label:nth-of-type(1){margin-left:-158px}
+  .hero-3d .orbit-label:nth-of-type(2){margin-left:-44px}
+  .hero-3d .orbit-label:nth-of-type(3){margin-left:32px}
+  .hero-3d .orbit-label:nth-of-type(4){margin-left:102px}
+}
+@media(max-width:380px){
+  .hero-3d .signature-orbit{margin-top:36px}
+  .hero-3d .orbit-label{padding:6px 9px!important;font-size:10.5px!important}
+  .hero-3d .orbit-label:nth-of-type(1){margin-left:-146px}
+  .hero-3d .orbit-label:nth-of-type(2){margin-left:-40px}
+  .hero-3d .orbit-label:nth-of-type(3){margin-left:30px}
+  .hero-3d .orbit-label:nth-of-type(4){margin-left:94px}
+}
+
+/* ---------- v10: phones — no arch line; name kept clear of the bake ---------- */
+@media(max-width:700px){
+  .hero-3d .arc-lines{display:none}
+  .hero-3d .hero-products{height:206px!important;top:96px!important}
+  .hero-3d #prev,.hero-3d #next{margin-top:22px}
+}
+@media(max-width:380px){.hero-3d .hero-products{height:192px!important}}
+
+/* ---------- v10: livelier hero animation ---------- */
+@media(prefers-reduced-motion:no-preference){
+  /* the bake floats gently */
+  .hero-3d .hero-products .hero-product.active{animation:hero-float 5.5s ease-in-out 1.2s infinite}
+  @keyframes hero-float{50%{translate:0 -12px}}
+  /* soft warm glow that breathes behind the bake */
+  .hero-3d .hero-stage::before{content:'';position:absolute;left:50%;top:44%;width:min(520px,80vw);aspect-ratio:1;translate:-50% -50%;border-radius:50%;background:radial-gradient(closest-side,rgba(255,255,255,.75),rgba(255,255,255,0));animation:hero-glow 6s ease-in-out infinite;pointer-events:none}
+  @keyframes hero-glow{50%{scale:1.08;opacity:.7}}
+  /* name, price and button slide in on every change */
+  .hero-3d .minimal-product.swap .minimal-product-line{animation:hero-name .7s cubic-bezier(.22,1,.36,1) both}
+  .hero-3d .minimal-product.swap strong{animation:hero-price .8s cubic-bezier(.34,1.56,.64,1) .12s both}
+  .hero-3d .minimal-product.swap .button{animation:hero-name .7s cubic-bezier(.22,1,.36,1) .08s both}
+  @keyframes hero-name{from{opacity:0;transform:translateY(14px)}}
+  @keyframes hero-price{from{opacity:0;transform:scale(.6) rotate(-10deg)}}
+  /* the selected label pops */
+  .hero-3d .orbit-label.selected{animation:chip-pop .5s cubic-bezier(.34,1.56,.64,1)}
+  @keyframes chip-pop{40%{scale:1.14}}
+  /* the dot on the arc pulses */
+  .hero-3d .orbit-pointer>span{animation:dot-pulse 2.2s ease-out infinite}
+  @keyframes dot-pulse{0%{box-shadow:0 0 0 0 rgba(20,58,107,.35),0 0 0 4px var(--hero-bg)}100%{box-shadow:0 0 0 14px rgba(20,58,107,0),0 0 0 4px var(--hero-bg)}}
+}
+
+/* ---------- v10: phones — name, price and button as one centred stack ---------- */
+@media(max-width:700px){
+  .hero-3d .minimal-product-line{flex-direction:column;align-items:center;justify-content:center;gap:8px;margin-bottom:14px}
+  .hero-3d .minimal-product h2{max-width:300px!important;text-align:center;line-height:1.15!important;font-size:21px!important}
+  .hero-3d .minimal-product strong{height:30px;min-width:56px;font-size:15px}
+  .hero-3d .minimal-product{bottom:54px}
+  .hero-3d .hero-products{height:196px!important;top:88px!important}
+}
+@media(max-width:380px){.hero-3d .hero-products{height:180px!important}.hero-3d .minimal-product h2{font-size:19px!important}}
+
+/* ---------- v10: neat hero CTA ---------- */
+.hero-3d .minimal-product .button{min-width:0!important;min-height:52px!important;padding:0 8px 0 26px!important;gap:16px!important;font-size:15px!important;font-weight:600!important;letter-spacing:.01em;border-radius:999px;transition:background .25s,transform .3s cubic-bezier(.22,1,.36,1),box-shadow .3s!important}
+.hero-3d .minimal-product .button>span{width:38px!important;height:38px!important;background:#f4d58d!important;color:#0f2944;transition:transform .3s cubic-bezier(.22,1,.36,1)!important}
+.hero-3d .minimal-product .button:hover{transform:translateY(-2px);box-shadow:0 18px 30px -14px rgba(20,58,107,.75)}
+.hero-3d .minimal-product .button:hover>span{transform:translateX(3px)}
+.hero-3d .minimal-product .button:active{transform:scale(.97)}
+@media(max-width:700px){.hero-3d .minimal-product .button{min-height:50px!important;font-size:15px!important}}
+/* CTA: text only, no arrow */
+.hero-3d .minimal-product .button>span{display:none!important}
+.hero-3d .minimal-product .button{padding:0 34px!important;justify-content:center!important}
