@@ -67,11 +67,11 @@ function renderCart() {
   $$('[data-cart-subtotal]').forEach(el => el.textContent = money(cartTotal()));
   const list = $('[data-cart-items]');
   if (list) {
-    list.innerHTML = cart.length ? cart.map(l => lineHTML(l)).join('') : `<li class="cart-empty"><img src="assets/studio-cookies.webp" alt=""><strong>Your order is empty</strong>Fresh bakes are a tap away.<br><a class="btn" href="shop.html">Browse the shop</a></li>`;
+    list.innerHTML = cart.length ? cart.map(l => lineHTML(l)).join('') : `<li class="cart-empty"><img src="assets/studio-cookies.webp" alt=""><strong>Your order is empty</strong>Fresh bakes are a tap away.<br><a class="btn" href="/shop">Browse the shop</a></li>`;
     $('[data-cart-foot]').hidden = !cart.length;
   }
   const summary = $('[data-summary-items]');
-  if (summary) summary.innerHTML = cart.length ? cart.map(l => lineHTML(l)).join('') : `<li class="cart-empty"><strong>Your order is empty</strong><a class="btn" href="shop.html">Browse the shop</a></li>`;
+  if (summary) summary.innerHTML = cart.length ? cart.map(l => lineHTML(l)).join('') : `<li class="cart-empty"><strong>Your order is empty</strong><a class="btn" href="/shop">Browse the shop</a></li>`;
   const place = $('[data-place-order]'); if (place) place.disabled = !cart.length;
 }
 document.addEventListener('click', e => {
@@ -110,7 +110,7 @@ function closePanels(restore = true) {
   if (restore && lastFocus) lastFocus.focus?.({ preventScroll: true });
 }
 document.addEventListener('click', e => {
-  if (e.target.closest('[data-open-cart]')) { e.preventDefault(); hideToast(); if (location.pathname.endsWith('checkout.html')) return; openPanel(cartEl); }
+  if (e.target.closest('[data-open-cart]')) { e.preventDefault(); hideToast(); if (location.pathname.endsWith('/checkout')) return; openPanel(cartEl); }
   if (e.target.closest('[data-close-cart],[data-close-nav],[data-backdrop]')) closePanels();
 });
 menuBtn?.addEventListener('click', () => openPanel(navEl));
@@ -273,7 +273,7 @@ function openProduct(id, trigger) {
       <ul class="pd-meta">
         <li>${ICON.clock}<span>Baked fresh after we confirm your order. Allow at least ${CFG.leadTimeHours} hours.</span></li>
         <li>${ICON.pin}<span>Pickup at ${esc(CFG.pickupAddress || 'Ramsey, Minnesota')}.</span></li>
-        <li>${ICON.card}<span>Secure online payment at checkout. Allergy questions? <a class="link" href="contact.html">Ask us first</a>.</span></li>
+        <li>${ICON.card}<span>Secure online payment at checkout. Allergy questions? <a class="link" href="/contact">Ask us first</a>.</span></li>
       </ul>
     </div></div>`;
   dialog.showModal();
@@ -335,7 +335,7 @@ if (checkoutForm) {
   const grand = () => cartTotal() + (deliveryFee() || 0);
   const items = $('[data-co-items]');
   const drawSummary = () => {
-    items.innerHTML = cart.length ? cart.map(l => { const p = byId(l.id); return `<li><span class="co-thumb"><img src="${img(p)}" alt=""><b>${l.qty}</b></span><span class="co-item-t"><strong>${esc(p.name)}</strong>${l.opt ? `<small>${esc(l.opt)}</small>` : ''}</span><span class="co-item-p">${money(p.price * l.qty)}</span></li>`; }).join('') : `<li class="co-empty">Your cart is empty. <a class="link" href="shop.html">Browse the bakes</a></li>`;
+    items.innerHTML = cart.length ? cart.map(l => { const p = byId(l.id); return `<li><span class="co-thumb"><img src="${img(p)}" alt=""><b>${l.qty}</b></span><span class="co-item-t"><strong>${esc(p.name)}</strong>${l.opt ? `<small>${esc(l.opt)}</small>` : ''}</span><span class="co-item-p">${money(p.price * l.qty)}</span></li>`; }).join('') : `<li class="co-empty">Your cart is empty. <a class="link" href="/shop">Browse the bakes</a></li>`;
     $('[data-place-order]').disabled = !cart.length;
     const fee = deliveryFee(), zs = zones();
     $('[data-co-ship-label]').textContent = isDelivery() ? 'Delivery' : 'Pickup';
@@ -353,7 +353,7 @@ if (checkoutForm) {
     if (!isDelivery() || !zones().length) { zipMsg.textContent = ''; checkoutForm.zip.setCustomValidity(''); return; }
     const v = checkoutForm.zip.value, z = zoneFor(v);
     if (z === undefined) { checkoutForm.zip.setCustomValidity(v ? 'zip' : ''); zipMsg.textContent = ''; zipMsg.className = 'field-msg'; }
-    else if (z === null) { checkoutForm.zip.setCustomValidity('nozone'); zipMsg.className = 'field-msg bad'; zipMsg.innerHTML = 'Sorry, we don’t deliver to this ZIP code yet. Choose pickup, or <a class="link" href="contact.html">ask us</a>.'; if (final) checkoutForm.zip.closest('.field')?.classList.add('bad'); }
+    else if (z === null) { checkoutForm.zip.setCustomValidity('nozone'); zipMsg.className = 'field-msg bad'; zipMsg.innerHTML = 'Sorry, we don’t deliver to this ZIP code yet. Choose pickup, or <a class="link" href="/contact">ask us</a>.'; if (final) checkoutForm.zip.closest('.field')?.classList.add('bad'); }
     else { checkoutForm.zip.setCustomValidity(''); zipMsg.className = 'field-msg ok'; const free = CFG.freeDeliveryOver && cartTotal() >= CFG.freeDeliveryOver; zipMsg.textContent = `We deliver here: ${free ? 'free delivery' : money(z.fee) + ' delivery'}.`; checkoutForm.zip.closest('.field')?.classList.remove('bad'); }
   };
   const syncFulfil = () => {
@@ -413,7 +413,7 @@ if (checkoutForm) {
     if (CFG.paymentUrl) { store.session('aem-last-order', record); cart = []; saveCart(); location.href = CFG.paymentUrl.replace('{ref}', encodeURIComponent(ref)).replace('{total}', total.toFixed(2)); return; }
     store.session('aem-last-order', record);
     cart = []; saveCart();
-    setTimeout(() => { location.href = 'order-confirmed.html'; }, record.via === 'email' ? 900 : 0);
+    setTimeout(() => { location.href = '/order-confirmed'; }, record.via === 'email' ? 900 : 0);
   });
 }
 
@@ -555,7 +555,7 @@ if (gf) {
     if (!gf.checkValidity()) { showError(gf, 'Please add the recipient’s name and email, and your name.'); gf.querySelector(':invalid')?.focus(); return; }
     const opt = `To ${gf.to_name.value.trim()} (${gf.to_email.value.trim()}) from ${gf.from_name.value.trim()}${gf.note.value.trim() ? ' — “' + gf.note.value.trim() + '”' : ''}`;
     addToCart('egift-' + a, Math.max(1, parseInt(gf.qty.value, 10) || 1), opt);
-    if (action === 'buy') location.href = 'checkout.html';
+    if (action === 'buy') location.href = '/checkout';
     else { gf.reset(); gf.querySelector('input[value="50"]').checked = true; sync(); }
   });
 }
@@ -586,7 +586,7 @@ if(hero){const slides=[
  {word:'sweetness.',description:'Golden edges. Chocolate chips. A little toffee crunch.',name:'Chocolate chip toffee cookies',category:'A LITTLE COOKIE HAPPINESS',price:'$3',slug:'chocolate-chip-toffee-cookies',background:'#FFF9EF',accent:'#a16e42'},
  {word:'comfort.',description:'Golden crust. Soft centers. Simply homemade.',name:'Mini French baguettes',category:'GOOD BREAD. GOOD COMPANY.',price:'$8',slug:'mini-french-baguettes',background:'#E7F0F6',accent:'#5b8ea8'},
  {word:'joy.',description:'Brown butter banana cake. Caramel cream cheese frosting.',name:'Brown butter banana cake',category:'MAKE A LITTLE MOMENT OF IT',price:'$15',slug:'brown-butter-banana-cake-with-caramel-cream-cheese-frosting',background:'#F8F2E7',accent:'#a27268'}
-];let active=0,timer=null,paused=reduced.matches;const mobile=window.matchMedia('(max-width:700px)');function setSlide(index){active=(index+slides.length)%slides.length;const s=slides[active];$('#hero-description').textContent=s.description;$('#hero-name').textContent=s.name;$('#hero-price').textContent=s.price;$('#hero-order').href='shop.html#item-'+s.slug;hero.style.setProperty('--hero-bg',s.background);hero.dataset.activeSlide=String(active);$('.orbit-pointer').style.transform=`rotate(${(mobile.matches?[-40,-18,18,40]:[-56,-18,18,56])[active]}deg)`;$$('.hero-product').forEach((img,i)=>{img.classList.toggle('active',i===active);img.setAttribute('aria-hidden',i!==active)});$$('[data-slide]').forEach((button,i)=>{button.classList.toggle('selected',i===active);button.setAttribute('aria-pressed',i===active)});$('#slide-count').innerHTML=`0${active+1} <i>/ 04</i>`;}function restart(){clearInterval(timer);if(!paused&&!document.hidden&&!hero.contains(document.activeElement))timer=setInterval(()=>setSlide(active+1),7500)}function change(delta){setSlide(active+delta);restart()}function updatePause(){const b=$('#pause');b.innerHTML=paused?'<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 10 7-10 7V5Z"/></svg>':'<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M9 6v12M15 6v12"/></svg>';b.setAttribute('aria-label',paused?'Play slideshow':'Pause slideshow');b.setAttribute('aria-pressed',paused)}$$('[data-slide]').forEach(button=>{button.addEventListener('click',()=>{setSlide(Number(button.dataset.slide));restart()});button.addEventListener('keydown',event=>{if(event.key==='ArrowRight'||event.key==='ArrowLeft'){event.preventDefault();change(event.key==='ArrowRight'?1:-1);$$('[data-slide]')[active].focus()}})});$('#prev').addEventListener('click',()=>change(-1));$('#next').addEventListener('click',()=>change(1));$('#pause').addEventListener('click',()=>{paused=!paused;updatePause();restart()});hero.addEventListener('focusin',()=>clearInterval(timer));hero.addEventListener('focusout',event=>{if(!hero.contains(event.relatedTarget))restart()});document.addEventListener('visibilitychange',restart);mobile.addEventListener('change',()=>setSlide(active));reduced.addEventListener('change',()=>{paused=reduced.matches;updatePause();restart()});setSlide(0);updatePause();restart();}
+];let active=0,timer=null,paused=reduced.matches;const mobile=window.matchMedia('(max-width:700px)');function setSlide(index){active=(index+slides.length)%slides.length;const s=slides[active];$('#hero-description').textContent=s.description;$('#hero-name').textContent=s.name;$('#hero-price').textContent=s.price;$('#hero-order').href='/shop#item-'+s.slug;hero.style.setProperty('--hero-bg',s.background);hero.dataset.activeSlide=String(active);$('.orbit-pointer').style.transform=`rotate(${(mobile.matches?[-40,-18,18,40]:[-56,-18,18,56])[active]}deg)`;$$('.hero-product').forEach((img,i)=>{img.classList.toggle('active',i===active);img.setAttribute('aria-hidden',i!==active)});$$('[data-slide]').forEach((button,i)=>{button.classList.toggle('selected',i===active);button.setAttribute('aria-pressed',i===active)});$('#slide-count').innerHTML=`0${active+1} <i>/ 04</i>`;}function restart(){clearInterval(timer);if(!paused&&!document.hidden&&!hero.contains(document.activeElement))timer=setInterval(()=>setSlide(active+1),7500)}function change(delta){setSlide(active+delta);restart()}function updatePause(){const b=$('#pause');b.innerHTML=paused?'<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 10 7-10 7V5Z"/></svg>':'<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M9 6v12M15 6v12"/></svg>';b.setAttribute('aria-label',paused?'Play slideshow':'Pause slideshow');b.setAttribute('aria-pressed',paused)}$$('[data-slide]').forEach(button=>{button.addEventListener('click',()=>{setSlide(Number(button.dataset.slide));restart()});button.addEventListener('keydown',event=>{if(event.key==='ArrowRight'||event.key==='ArrowLeft'){event.preventDefault();change(event.key==='ArrowRight'?1:-1);$$('[data-slide]')[active].focus()}})});$('#prev').addEventListener('click',()=>change(-1));$('#next').addEventListener('click',()=>change(1));$('#pause').addEventListener('click',()=>{paused=!paused;updatePause();restart()});hero.addEventListener('focusin',()=>clearInterval(timer));hero.addEventListener('focusout',event=>{if(!hero.contains(event.relatedTarget))restart()});document.addEventListener('visibilitychange',restart);mobile.addEventListener('change',()=>setSlide(active));reduced.addEventListener('change',()=>{paused=reduced.matches;updatePause();restart()});setSlide(0);updatePause();restart();}
 
 
 /* hero "Order now": buy on this site instead of leaving for the old store */

@@ -32,7 +32,7 @@ const win = w => w ? String(w).split(' (')[0] : '';
 const winTime = w => (String(w || '').match(/\((.*)\)/) || [])[1] || '';
 const itemCount = o => (o.items || []).reduce((n, i) => n + (i.qty || 0), 0);
 const pill = s => `<span class="pill s-${esc(s)}">${STATUS[s] || esc(s)}</span>`;
-const pageFile = key => key.split('.')[0] + '.html';
+const pageFile = key => { const name = key.split('.')[0]; return name === 'index' ? '/' : '/' + name; };
 const siteHref = f => SITE || f;
 
 function toast(msg, bad) {
