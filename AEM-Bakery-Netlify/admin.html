@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#ffffff">
+<title>Dashboard | AEM Bakery</title>
+<link rel="icon" href="assets/logo.png" type="image/png">
+<link rel="preload" href="assets/fonts/dm-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="admin.css">
+<script defer src="products.js"></script>
+<script defer src="config.js"></script>
+<script defer src="assets/vendor/supabase.js"></script>
+<script defer src="data.js"></script>
+<script defer src="admin.js"></script>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 11 12 4l8 7v8a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1v-8Z"/></symbol>
+  <symbol id="i-orders" viewBox="0 0 24 24"><path d="M5 8h14l-1 12H6L5 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></symbol>
+  <symbol id="i-products" viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></symbol>
+  <symbol id="i-content" viewBox="0 0 24 24"><rect x="3.5" y="4.5" width="17" height="15" rx="2"/><path d="M3.5 9h17M8 13h8M8 16h5"/></symbol>
+  <symbol id="i-settings" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></symbol>
+  <symbol id="i-ext" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
+  <symbol id="i-out" viewBox="0 0 24 24"><path d="M15 4h4a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-4M10 8l-4 4 4 4M6 12h10"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+  <symbol id="i-x" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M15 5 8 12l7 7"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
+  <symbol id="i-mail" viewBox="0 0 24 24"><rect x="3.5" y="5.5" width="17" height="13" rx="2"/><path d="m4 7 8 6 8-6"/></symbol>
+  <symbol id="i-phone" viewBox="0 0 24 24"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a1 1 0 0 1-1 1A16 16 0 0 1 4 5a1 1 0 0 1 1-1Z"/></symbol>
+  <symbol id="i-print" viewBox="0 0 24 24"><path d="M7 9V4h10v5M7 17H5a1 1 0 0 1-1-1v-6a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v6a1 1 0 0 1-1 1h-2"/><rect x="7" y="14" width="10" height="6" rx="1"/></symbol>
+  <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11Z"/><circle cx="12" cy="10" r="2.3"/></symbol>
+  <symbol id="i-truck" viewBox="0 0 24 24"><path d="M3 6.5h11v9H3zM14 10h4l3 3v2.5h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></symbol>
+  <symbol id="i-note" viewBox="0 0 24 24"><path d="M6 4h9l4 4v12H6z"/><path d="M14 4v5h5M9 13h7M9 16h5"/></symbol>
+  <symbol id="i-image" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="2"/><circle cx="9" cy="9" r="1.6"/><path d="m4 17 5-5 4 4 2-2 5 5"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M5 20h14"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M5 7h14M10 7V5h4v2M7 7l1 13h8l1-13"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5"/></symbol>
+  <symbol id="i-basket" viewBox="0 0 24 24"><path d="M4 10h16l-1.6 9H5.6L4 10Z"/><path d="m8 10 3-6M16 10l-3-6"/></symbol>
+  <symbol id="i-gift" viewBox="0 0 24 24"><rect x="4" y="9" width="16" height="11" rx="1.5"/><path d="M3 9h18M12 9v11M12 9S9.5 4 7.5 5.5 9 9 12 9Zm0 0s2.5-5 4.5-3.5S15 9 12 9Z"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M9 6v12M15 6v12"/></symbol>
+</svg>
+
+<div class="auth" id="login" hidden>
+  <form class="auth-card" id="login-form" novalidate>
+    <img src="assets/logo-badge.webp" alt="AEM Bakery" width="72" height="70">
+    <h1>Sign in</h1>
+    <p>Manage orders, products and your website.</p>
+    <div class="alert bad" data-login-error role="alert" hidden></div>
+    <label class="fld">Email<input name="email" type="email" autocomplete="username" required></label>
+    <label class="fld">Password<input name="password" type="password" autocomplete="current-password" required></label>
+    <button class="btn primary block" type="submit">Sign in</button>
+  </form>
+</div>
+
+<div class="auth" id="setup" hidden>
+  <div class="auth-card">
+    <img src="assets/logo-badge.webp" alt="AEM Bakery" width="72" height="70">
+    <h1>Connect your dashboard</h1>
+    <p>The dashboard isn’t connected to a database yet. Follow the “Owner dashboard” steps in README.txt, then reload this page.</p>
+  </div>
+</div>
+
+<div class="app" id="app" hidden>
+  <aside class="side" aria-label="Dashboard">
+    <a class="brand" href="index.html" target="_blank" rel="noopener" data-site-link><img src="assets/logo-badge.webp" alt="" width="40" height="39"><span><b>AEM Bakery</b><small>Dashboard</small></span></a>
+    <nav class="nav">
+      <button data-tab="home"><svg><use href="#i-home"/></svg><span>Home</span></button>
+      <button data-tab="orders"><svg><use href="#i-orders"/></svg><span>Orders</span><b class="badge" data-new-count hidden>0</b></button>
+      <button data-tab="products"><svg><use href="#i-products"/></svg><span>Products</span></button>
+      <button data-tab="content"><svg><use href="#i-content"/></svg><span>Website</span></button>
+      <button data-tab="settings"><svg><use href="#i-settings"/></svg><span>Settings</span></button>
+    </nav>
+    <div class="side-foot">
+      <button class="store-state" data-store-toggle><i></i><span data-store-label>Taking orders</span></button>
+      <a href="index.html" target="_blank" rel="noopener" data-site-link><svg><use href="#i-ext"/></svg>View website</a>
+      <button data-signout><svg><use href="#i-out"/></svg>Sign out</button>
+    </div>
+  </aside>
+
+  <header class="mtop">
+    <img src="assets/logo-badge.webp" alt="" width="34" height="33">
+    <strong data-mtitle>Home</strong>
+    <a class="icon-btn" href="index.html" target="_blank" rel="noopener" data-site-link aria-label="View website"><svg><use href="#i-ext"/></svg></a>
+  </header>
+
+  <main class="main" id="main">
+    <div class="demo" id="demo-banner" hidden><b>Preview mode.</b> <span data-demo-text>Try everything: changes are saved in this browser only, and the orders are examples.</span></div>
+
+    <!-- HOME -->
+    <section class="panel" data-panel="home" hidden>
+      <div class="ph"><div><h1 data-greet>Good morning</h1><p data-today></p></div></div>
+      <div class="paused-bar" data-paused-bar hidden><svg><use href="#i-pause"/></svg><span><b>Ordering is paused.</b> Customers can browse but can’t check out.</span><button class="btn sm" data-store-toggle>Resume orders</button></div>
+      <div class="stats" data-stats></div>
+      <div class="home-grid">
+        <div class="card"><div class="card-h"><h2>Needs confirming</h2><button class="link-btn" data-go="orders" data-filter="new">View all</button></div><ul class="mini-list" data-home-new></ul></div>
+        <div class="card"><div class="card-h"><h2>Coming up</h2><button class="link-btn" data-go="orders" data-filter="open">All open orders</button></div><div data-home-upcoming></div></div>
+      </div>
+      <div class="quick">
+        <button class="quick-a" data-go="products" data-new-product><svg><use href="#i-plus"/></svg><span><b>Add a product</b><small>Name, price and photo</small></span></button>
+        <button class="quick-a" data-go="content"><svg><use href="#i-content"/></svg><span><b>Edit website text</b><small>Headings, buttons and photos</small></span></button>
+        <button class="quick-a" data-go="settings" data-focus="announcement"><svg><use href="#i-note"/></svg><span><b>Change announcement</b><small>The bar at the top of the site</small></span></button>
+        <button class="quick-a" data-go="settings" data-focus="delivery"><svg><use href="#i-truck"/></svg><span><b>Delivery areas</b><small>ZIP codes and fees</small></span></button>
+      </div>
+    </section>
+
+    <!-- ORDERS -->
+    <section class="panel" data-panel="orders" hidden>
+      <div class="ph"><div><h1>Orders</h1><p>New orders appear here the moment they’re placed.</p></div>
+        <div class="ph-tools"><label class="search"><svg><use href="#i-search"/></svg><input type="search" placeholder="Search name, email or order #" data-order-search aria-label="Search orders"></label>
+        <select class="select" data-order-sort aria-label="Sort orders"><option value="new">Newest first</option><option value="due">Soonest due</option></select></div></div>
+      <div class="seg" role="tablist" data-status-tabs></div>
+      <div class="orders">
+        <div class="o-list" data-order-list></div>
+        <article class="o-detail" data-order-detail aria-live="polite"></article>
+      </div>
+    </section>
+
+    <!-- PRODUCTS -->
+    <section class="panel" data-panel="products" hidden>
+      <div class="ph"><div><h1>Products</h1><p>What customers can order. Switch a product off to hide it without deleting it.</p></div>
+        <div class="ph-tools"><label class="search"><svg><use href="#i-search"/></svg><input type="search" placeholder="Search products" data-prod-search aria-label="Search products"></label>
+        <button class="btn primary" data-new-product><svg><use href="#i-plus"/></svg>Add product</button></div></div>
+      <div class="seg" data-cat-tabs></div>
+      <div class="table" data-product-list></div>
+    </section>
+
+    <!-- WEBSITE CONTENT -->
+    <section class="panel" data-panel="content" hidden>
+      <div class="ph"><div><h1>Website</h1><p>Change the words and photos on any page. Press Save to publish.</p></div>
+        <div class="ph-tools"><label class="search"><svg><use href="#i-search"/></svg><input type="search" placeholder="Find text on any page" data-content-search aria-label="Find text"></label></div></div>
+      <div class="content-wrap">
+        <nav class="pages" data-pages aria-label="Pages"></nav>
+        <select class="select pages-select" data-pages-select aria-label="Page"></select>
+        <div class="content-body" data-content-list></div>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+    <section class="panel" data-panel="settings" hidden>
+      <div class="ph"><div><h1>Settings</h1><p>How ordering, delivery and payments work.</p></div></div>
+      <form class="settings" data-settings-form novalidate>
+        <div class="card set" id="set-ordering">
+          <div class="set-h"><h2>Ordering</h2><p>Pause checkout when you’re fully booked or away.</p></div>
+          <div class="set-b">
+            <label class="switch-row"><span><b>Taking orders</b><small>When off, customers can browse but not check out.</small></span><span class="switch"><input type="checkbox" name="accepting_orders"><i></i></span></label>
+          </div>
+        </div>
+        <div class="card set" id="set-announcement">
+          <div class="set-h"><h2>Announcement bar</h2><p>The short message at the top of every page.</p></div>
+          <div class="set-b">
+            <label class="fld">Message<input name="announcement" maxlength="120"></label>
+            <div class="ann-preview" data-ann-preview></div>
+          </div>
+        </div>
+        <div class="card set" id="set-prep">
+          <div class="set-h"><h2>Preparation time</h2><p>Bigger orders get more notice. Checkout only offers dates you can make, and tells customers when their order will be ready.</p></div>
+          <div class="set-b">
+            <label class="fld short">Minimum notice for any order<span class="unit"><input name="lead_time_hours" type="number" min="1" max="336" inputmode="numeric"><em>hours</em></span></label>
+            <div class="rules" data-prep-rules></div>
+            <button type="button" class="link-btn" data-add-rule><svg><use href="#i-plus"/></svg>Add a rule</button>
+          </div>
+        </div>
+        <div class="card set" id="set-delivery">
+          <div class="set-h"><h2>Delivery</h2><p>Customers enter their ZIP code at checkout and see the fee straight away. ZIP codes not listed can’t choose delivery.</p></div>
+          <div class="set-b">
+            <label class="switch-row"><span><b>Offer delivery</b><small>When off, checkout shows pickup only.</small></span><span class="switch"><input type="checkbox" name="delivery_enabled"><i></i></span></label>
+            <div class="zones" data-zones></div>
+            <button type="button" class="link-btn" data-add-zone><svg><use href="#i-plus"/></svg>Add a delivery area</button>
+            <label class="fld short">Free delivery on orders over<span class="unit pre"><em>$</em><input name="free_delivery_over" type="number" min="0" step="1" inputmode="decimal"></span><small class="help">Leave at 0 to always charge delivery.</small></label>
+          </div>
+        </div>
+        <div class="card set" id="set-baskets">
+          <div class="set-h"><h2>Holiday baskets</h2><p>Price of the basket itself, and how many bakes fit in one. When a basket is full, customers are asked to start another.</p></div>
+          <div class="set-b two">
+            <label class="fld">Basket price<span class="unit pre"><em>$</em><input name="basket_price" type="number" min="0" step="0.5" inputmode="decimal"></span></label>
+            <label class="fld">Items per basket<span class="unit"><input name="basket_capacity" type="number" min="0" max="200" inputmode="numeric"><em>items</em></span><small class="help">0 means no limit.</small></label>
+          </div>
+        </div>
+        <div class="card set" id="set-payments">
+          <div class="set-h"><h2>Payments</h2><p>Paste a payment link from Stripe or Square. After “Continue to payment”, customers are sent there to pay by card, Apple Pay or Google Pay, and they get a receipt by email.</p></div>
+          <div class="set-b">
+            <label class="fld">Payment link<input name="payment_url" type="url" placeholder="https://buy.stripe.com/…" inputmode="url"><small class="help">Optional: add {ref} and {total} to pass the order number and amount.</small></label>
+            <div class="pay-state" data-pay-state></div>
+          </div>
+        </div>
+        <div class="card set" id="set-account">
+          <div class="set-h"><h2>Account</h2><p data-account-email>Signed in.</p></div>
+          <div class="set-b"><button type="button" class="btn" data-signout><svg><use href="#i-out"/></svg>Sign out</button></div>
+        </div>
+      </form>
+    </section>
+  </main>
+
+  <nav class="tabbar" aria-label="Dashboard">
+    <button data-tab="home"><svg><use href="#i-home"/></svg>Home</button>
+    <button data-tab="orders"><svg><use href="#i-orders"/></svg>Orders<b class="badge" data-new-count hidden>0</b></button>
+    <button data-tab="products"><svg><use href="#i-products"/></svg>Products</button>
+    <button data-tab="content"><svg><use href="#i-content"/></svg>Website</button>
+    <button data-tab="settings"><svg><use href="#i-settings"/></svg>Settings</button>
+  </nav>
+
+  <div class="savebar" data-savebar hidden role="region" aria-label="Unsaved changes">
+    <span data-savebar-text>Unsaved changes</span>
+    <div><button class="btn" type="button" data-discard>Discard</button><button class="btn primary" type="button" data-save>Save</button></div>
+  </div>
+</div>
+
+<!-- product editor -->
+<dialog class="sheet" id="prod-sheet" aria-labelledby="prod-sheet-title">
+  <form class="sheet-in" data-prod-form novalidate>
+    <header class="sheet-h"><button type="button" class="icon-btn" data-sheet-close aria-label="Close"><svg><use href="#i-x"/></svg></button><h2 id="prod-sheet-title">Edit product</h2></header>
+    <div class="sheet-b">
+      <div class="photo-field"><img data-prod-photo alt="" src="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="><div><b>Photo</b><small>Square photos look best.</small><button type="button" class="btn sm" data-prod-pick><svg><use href="#i-image"/></svg>Change photo</button></div></div>
+      <input type="hidden" name="image">
+      <label class="fld">Name<input name="name" required maxlength="80"></label>
+      <div class="two">
+        <label class="fld">Price<span class="unit pre"><em>$</em><input name="price" type="number" min="0" step="0.01" required inputmode="decimal"></span></label>
+        <label class="fld">Category<select name="category"></select><small class="help" data-cat-help></small></label>
+      </div>
+      <label class="fld">Short line<input name="tagline" maxlength="90" placeholder="e.g. Soft, gooey and frosted"><small class="help">Shown under the name on the shop page.</small></label>
+      <label class="fld">Description<textarea name="description" rows="4" maxlength="600"></textarea></label>
+      <label class="fld">Label<input name="badge" maxlength="24" placeholder="e.g. Bestseller"><small class="help">Optional small tag on the photo.</small></label>
+      <label class="switch-row"><span><b>Frosting choice</b><small>Customers pick warm, cooled or no frosting.</small></span><span class="switch"><input type="checkbox" name="has_frosting_options"><i></i></span></label>
+      <label class="switch-row" data-basket-row><span><b>Also in holiday baskets</b><small>Customers can add it when building a holiday basket.</small></span><span class="switch"><input type="checkbox" name="in_basket"><i></i></span></label>
+      <label class="switch-row"><span><b>On the menu</b><small>Off hides it from the website.</small></span><span class="switch"><input type="checkbox" name="active"><i></i></span></label>
+      <div class="alert bad" data-prod-error hidden></div>
+    </div>
+    <footer class="sheet-f"><button type="button" class="btn danger-ghost" data-prod-delete><svg><use href="#i-trash"/></svg>Delete</button><span class="grow"></span><button type="button" class="btn" data-sheet-close>Cancel</button><button class="btn primary" type="submit">Save</button></footer>
+  </form>
+</dialog>
+
+<!-- photo picker -->
+<dialog class="sheet wide" id="photo-picker" aria-labelledby="pp-title">
+  <div class="sheet-in">
+    <header class="sheet-h"><button type="button" class="icon-btn" data-pp-close aria-label="Close"><svg><use href="#i-x"/></svg></button><h2 id="pp-title">Choose a photo</h2></header>
+    <div class="sheet-b">
+      <label class="drop"><input type="file" accept="image/*" data-upload><svg><use href="#i-upload"/></svg><b>Upload from your phone or computer</b><small>JPG, PNG or WebP, up to 5 MB</small></label>
+      <p class="muted">Or use a photo already on your website</p>
+      <div class="library" data-library></div>
+    </div>
+  </div>
+</dialog>
+
+<!-- confirm -->
+<dialog class="confirm" id="confirm" aria-labelledby="confirm-title">
+  <form method="dialog">
+    <h2 id="confirm-title" data-confirm-title>Are you sure?</h2>
+    <p data-confirm-text></p>
+    <div class="confirm-f"><button class="btn" value="no">Cancel</button><button class="btn primary" value="yes" data-confirm-ok>OK</button></div>
+  </form>
+</dialog>
+
+<div class="toast" data-toast role="status" aria-live="polite"></div>
+</body>
+</html>
