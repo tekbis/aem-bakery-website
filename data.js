@@ -28,9 +28,9 @@ const listeners = { menu: [], orders: [] };
 const emit = (k, ...a) => listeners[k].forEach(f => { try { f(...a); } catch (e) { console.error(e); } });
 
 /* row <-> product */
-const toRow = (p, i = 0) => ({ id: p.id, name: p.name, price: Number(p.price), category: p.category, image: p.image, tagline: p.tagline || '', description: p.description || '', badge: p.badge || null, has_frosting_options: !!(p.options || p.has_frosting_options), active: p.active !== false, sort: p.sort ?? (i + 1) * 10 });
-const toProduct = r => ({ id: r.id, name: r.name, price: Number(r.price), category: r.category, image: r.image, tagline: r.tagline, description: r.description, badge: r.badge || undefined, options: r.has_frosting_options ? FROSTING : undefined, active: r.active, sort: r.sort });
-const STATIC_ROWS = (window.AEM_PRODUCTS || []).map(toRow);
+const toRow = (p, i = 0) => ({ id: p.id, name: p.name, price: Number(p.price), category: p.category, image: p.image, tagline: p.tagline || '', description: p.description || '', badge: p.badge || null, has_frosting_options: !!(p.options || p.has_frosting_options), in_basket: !!(p.inBasket || p.in_basket), active: p.active !== false, sort: p.sort ?? (i + 1) * 10 });
+const toProduct = r => ({ id: r.id, name: r.name, price: Number(r.price), category: r.category, image: r.image, tagline: r.tagline, description: r.description, badge: r.badge || undefined, options: r.has_frosting_options ? FROSTING : undefined, inBasket: !!r.in_basket, active: r.active, sort: r.sort });
+const STATIC_ROWS = [...(window.AEM_PRODUCTS || []), ...(window.AEM_HOLIDAY_ITEMS || [])].map(toRow);
 
 /* ---------------- backends ---------------- */
 let sb = null;
@@ -52,7 +52,8 @@ function sampleOrders() {
 }
 const demo = {
   KEY: 'aem-demo-db',
-  load() { try { const d = JSON.parse(localStorage.getItem(this.KEY)); if (d && d.products) return d; } catch {} return { products: STATIC_ROWS, settings: { ...DEFAULT_SETTINGS }, orders: sampleOrders() }; },
+  load() { try { const d = JSON.parse(localStorage.getItem(this.KEY)); if (d && d.products) { if (!d.basketSeeded) { d.basketSeeded = true; d.products.forEach(p => { const r = STATIC_ROWS.find(x => x.id === p.id); if (r && r.in_basket && p.in_basket === undefined) p.in_basket = true; }); this.save(d); }
+      if (!d.holidaySeeded) { d.holidaySeeded = true; STATIC_ROWS.filter(r => r.category === 'holiday' && !d.products.some(p => p.id === r.id)).forEach(r => d.products.push(r)); this.save(d); } return d; } } catch {} return { products: STATIC_ROWS, holidaySeeded: true, basketSeeded: true, settings: { ...DEFAULT_SETTINGS }, orders: sampleOrders() }; },
   save(d) { try { localStorage.setItem(this.KEY, JSON.stringify(d)); } catch {} }
 };
 
@@ -130,7 +131,9 @@ if (mode === 'supabase') {
 async function loadSite() {
   const [rows, s] = await Promise.all([api.products(), api.settings()]);
   const list = window.AEM_PRODUCTS || (window.AEM_PRODUCTS = []);
-  list.splice(0, list.length, ...rows.map(toProduct));
+  list.splice(0, list.length, ...rows.filter(r => r.category !== 'holiday').map(toProduct));
+  const hol = window.AEM_HOLIDAY_ITEMS || (window.AEM_HOLIDAY_ITEMS = []);
+  hol.splice(0, hol.length, ...rows.filter(r => r.category === 'holiday').map(toProduct));
   const cfg = window.AEM_CONFIG || (window.AEM_CONFIG = {});
   cfg.leadTimeHours = Number(s.lead_time_hours) || 6;
   cfg.acceptingOrders = s.accepting_orders !== false;

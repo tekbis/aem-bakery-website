@@ -39,3 +39,14 @@ Downloaded from Unsplash and used under the Unsplash License (https://unsplash.c
 
 ## Fonts
 - Fraunces (headings) and DM Sans (body), self-hosted, SIL Open Font License.
+
+## Holiday basket item photos (assets/holiday-*.webp)
+Free photos from Unsplash (Unsplash License). Starting images: the owner can replace them in the dashboard.
+
+| File | Unsplash photo |
+|---|---|
+| holiday-vanilla.webp | https://unsplash.com/photos/fIGw-jVGy5g |
+| holiday-caramel.webp | https://unsplash.com/photos/0h5Qfg0OWFo |
+| holiday-honey.webp | https://unsplash.com/photos/yQzrDgU-KAI |
+| holiday-olive-oil.webp | https://unsplash.com/photos/uOBApnN_K7w |
+| holiday-simmer-pot.webp | https://unsplash.com/photos/40Pc3ANmmIM |

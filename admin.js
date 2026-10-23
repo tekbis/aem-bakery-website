@@ -32,7 +32,7 @@ const win = w => w ? String(w).split(' (')[0] : '';
 const winTime = w => (String(w || '').match(/\((.*)\)/) || [])[1] || '';
 const itemCount = o => (o.items || []).reduce((n, i) => n + (i.qty || 0), 0);
 const pill = s => `<span class="pill s-${esc(s)}">${STATUS[s] || esc(s)}</span>`;
-const pageFile = key => { const name = key.split('.')[0]; return name === 'index' ? '/' : '/' + name; };
+const pageFile = key => key.split('.')[0] + '.html';
 const siteHref = f => SITE || f;
 
 function toast(msg, bad) {
@@ -235,7 +235,7 @@ function drawProducts() {
     <div class="p-row${p.active === false ? ' off' : ''}" data-edit-prod="${esc(p.id)}" tabindex="0" role="button" aria-label="Edit ${esc(p.name)}">
       <img src="${esc(src(p.image))}" alt="" loading="lazy">
       <span class="p-name"><b>${esc(p.name)}</b><small>${esc(p.tagline || '')}</small></span>
-      <span class="p-cat">${esc(CATS[p.category] || p.category)}${p.badge ? ` · ${esc(p.badge)}` : ''}</span>
+      <span class="p-cat">${esc(CATS[p.category] || p.category)}${p.badge ? ` · ${esc(p.badge)}` : ''}${p.in_basket && p.category !== 'holiday' ? ' · In baskets' : ''}</span>
       <span class="p-price">${money(p.price)}</span>
       <label class="p-on" data-stop><span class="switch"><input type="checkbox" data-toggle-prod="${esc(p.id)}"${p.active !== false ? ' checked' : ''} aria-label="${esc(p.name)} on the menu"><i></i></span><span>${p.active !== false ? 'On' : 'Hidden'}</span></label>
       ${ic('chev')}</div>`).join('') : `<div class="empty"><b>No products found</b>${q ? 'Try a different search.' : 'Add your first product.'}</div>`);
@@ -257,7 +257,9 @@ document.addEventListener('change', async e => {
 $('[data-prod-search]').addEventListener('input', e => { pQuery = e.target.value; drawProducts(); });
 
 const sheet = $('#prod-sheet'), pf = $('[data-prod-form]'); let editing = null, snap = '';
-const ser = () => JSON.stringify([...new FormData(pf)].concat([['a', pf.active.checked], ['f', pf.has_frosting_options.checked]]));
+const ser = () => JSON.stringify([...new FormData(pf)].concat([['a', pf.active.checked], ['f', pf.has_frosting_options.checked], ['b', pf.in_basket.checked]]));
+const catHelp = () => { const h = pf.category.value === 'holiday'; $('[data-cat-help]').textContent = h ? 'Shown in Holiday specials and inside holiday baskets, not in the daily shop.' : 'Shown in the daily shop.'; pf.has_frosting_options.closest('.switch-row').hidden = h; $('[data-basket-row]').hidden = h; };
+pf.category.addEventListener('change', catHelp);
 pf.category.innerHTML = Object.entries(CATS).map(([k, l]) => `<option value="${k}">${esc(l)}</option>`).join('');
 function openProduct(p) {
   editing = p;
@@ -265,8 +267,8 @@ function openProduct(p) {
   $('#prod-sheet-title').textContent = p ? 'Edit product' : 'New product';
   pf.name.value = d.name; pf.price.value = d.price === '' ? '' : Number(d.price).toFixed(2); pf.category.value = d.category; pf.image.value = d.image;
   pf.tagline.value = d.tagline || ''; pf.description.value = d.description || ''; pf.badge.value = d.badge || '';
-  pf.active.checked = d.active !== false; pf.has_frosting_options.checked = !!d.has_frosting_options;
-  $('[data-prod-photo]').src = src(d.image); $('[data-prod-delete]').hidden = !p; $('[data-prod-error]').hidden = true;
+  pf.active.checked = d.active !== false; pf.has_frosting_options.checked = !!d.has_frosting_options; pf.in_basket.checked = !!d.in_basket;
+  catHelp(); $('[data-prod-photo]').src = src(d.image); $('[data-prod-delete]').hidden = !p; $('[data-prod-error]').hidden = true;
   $$('.fld.bad', pf).forEach(f => f.classList.remove('bad'));
   snap = ser(); sheet.showModal(); if (!p) setTimeout(() => pf.name.focus(), 50);
 }
@@ -283,7 +285,7 @@ pf.addEventListener('submit', async e => {
   if (bad.length) { bad.forEach(([f]) => f.closest('.fld').classList.add('bad')); err.textContent = bad[0][1]; err.hidden = false; bad[0][0].focus(); return; }
   const slug = pf.name.value.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
   const id = editing ? editing.id : (products.some(p => p.id === slug) ? slug + '-' + Date.now().toString(36).slice(-4) : slug || 'bake-' + Date.now().toString(36));
-  const row = { ...(editing || { sort: (Math.max(0, ...products.map(p => p.sort || 0)) + 10) }), id, name: pf.name.value.trim(), price: Number(pf.price.value), category: pf.category.value, image: pf.image.value, tagline: pf.tagline.value.trim(), description: pf.description.value.trim(), badge: pf.badge.value.trim() || null, active: pf.active.checked, has_frosting_options: pf.has_frosting_options.checked };
+  const row = { ...(editing || { sort: (Math.max(0, ...products.map(p => p.sort || 0)) + 10) }), id, name: pf.name.value.trim(), price: Number(pf.price.value), category: pf.category.value, image: pf.image.value, tagline: pf.tagline.value.trim(), description: pf.description.value.trim(), badge: pf.badge.value.trim() || null, active: pf.active.checked, has_frosting_options: pf.has_frosting_options.checked, in_basket: pf.category.value !== 'holiday' && pf.in_basket.checked };
   const b = $('button[type=submit]', pf); b.disabled = true; b.textContent = 'Saving…';
   try {
     await db.saveProduct(row);

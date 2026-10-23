@@ -58,7 +58,9 @@ Every change shows on the live website within seconds. You don't need to redeplo
 - Home: new orders waiting to be confirmed, orders due today, sales for the last 7 days, and what's coming up this week.
 - Orders: appear the moment they're placed. One tap moves an order along: Confirm, then Start baking, then Mark as ready,
   then Completed. You can also email the customer (the message is pre-written), call them, or print the order.
-- Products: change the name, price, photo, description or category. Switch a product off to hide it, add a new one, or delete one.
+- Products: change the name, price, photo, description or category.
+  Category "Holiday specials" = items sold only for the holidays: shown on the Holiday baskets page and inside baskets, never in the daily shop.
+  For a daily bake, switch on "Also in holiday baskets" to offer it inside baskets too. Switch a product off to hide it, add a new one, or delete one.
 - Website: change any heading, paragraph, button or photo on every page, then press Save.
 - Settings:
   - pause ordering

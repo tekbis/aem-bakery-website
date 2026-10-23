@@ -7,12 +7,13 @@ create table if not exists public.products (
   id          text primary key,
   name        text not null,
   price       numeric(8,2) not null check (price >= 0),
-  category    text not null check (category in ('rolls','treats','bakes')),
+  category    text not null check (category in ('rolls','treats','bakes','holiday')),
   image       text not null default 'studio-rolls.webp',
   tagline     text not null default '',
   description text not null default '',
   badge       text,
   has_frosting_options boolean not null default false,
+  in_basket   boolean not null default false,
   active      boolean not null default true,
   sort        int not null default 100,
   updated_at  timestamptz not null default now()
@@ -43,6 +44,9 @@ create table if not exists public.orders (
 );
 
 -- upgrade older installs
+alter table public.products add column if not exists in_basket boolean not null default false;
+alter table public.products drop constraint if exists products_category_check;
+alter table public.products add constraint products_category_check check (category in ('rolls','treats','bakes','holiday'));
 alter table public.orders add column if not exists delivery_fee numeric(10,2) not null default 0;
 alter table public.orders add column if not exists confirmation_sent boolean not null default false;
 
@@ -125,3 +129,16 @@ insert into public.products (id, name, price, category, image, tagline, descript
   ('sprinkles-cinnamon-roll', 'Sprinkles Cinnamon Roll', 12, 'rolls', 'menu-15.webp', 'A sprinkle of celebration', 'Vanilla frosting and rainbow sprinkles — birthday-ready.', null, true, 180),
   ('hazelnut-chocolate-chip-cinnamon-rolls', 'Hazelnut Chocolate Chip Cinnamon Rolls', 12, 'rolls', 'menu-17.webp', 'Chocolate and hazelnut happiness', 'Chocolate hazelnut frosting and chocolate chips on a soft swirl.', null, true, 190)
 on conflict (id) do nothing;
+
+-- ---------- holiday basket items (only shown in the basket builder) ----------
+insert into public.products (id, name, price, category, image, tagline, description, badge, has_frosting_options, sort) values
+  ('vanilla-bean-paste', 'Homemade Vanilla Bean Paste', 14, 'holiday', 'holiday-vanilla.webp', 'Rich, speckled and homemade', 'Real vanilla beans in a thick, spoonable paste for baking and drinks.', null, false, 1000),
+  ('simmer-pot-mix', 'Simmer Pot Mix', 8, 'holiday', 'holiday-simmer-pot.webp', 'Makes the whole house smell like the holidays', 'Dried citrus, cinnamon, cloves and spices to simmer on the stove.', null, false, 1010),
+  ('homemade-caramel', 'Homemade Caramel', 10, 'holiday', 'holiday-caramel.webp', 'Buttery, slow-cooked caramel', 'Silky caramel for drizzling, dipping or eating by the spoon.', null, false, 1020),
+  ('infused-olive-oil', 'Infused Olive Oil', 15, 'holiday', 'holiday-olive-oil.webp', 'Herb-infused, for cooking and dipping', 'Olive oil infused with herbs and garlic. Lovely with fresh bread.', null, false, 1030),
+  ('infused-honey', 'Infused Honey', 12, 'holiday', 'holiday-honey.webp', 'Golden honey with a gentle twist', 'Local-style honey infused with warm flavors like cinnamon or vanilla.', null, false, 1040)
+on conflict (id) do nothing;
+
+-- popular daily bakes also offered inside holiday baskets (owner can change this in the dashboard)
+update public.products set in_basket = true where id in ('vanilla-bean-cinnamon-rolls', 'chocolate-chip-toffee-cookies', 'brown-butter-banana-cake-with-caramel-cream-cheese-frosting', 'roasted-marshmallow-pumpkin-spice-cinnamon-roll') and not exists (select 1 from public.settings where key = 'basket_items_seeded');
+insert into public.settings (key, value) values ('basket_items_seeded', 'true') on conflict (key) do nothing;

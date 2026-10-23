@@ -14,7 +14,8 @@ const CATS = window.AEM_CATEGORIES || {};
 const CFG = window.AEM_CONFIG || { email: 'AEMBakery@gmail.com', leadTimeHours: 6 };
 const giftItem = id => { const v = Number(String(id).split('-')[1]); return v >= 5 ? { id, name: `eGift Card ($${v})`, price: v, category: 'gift', image: 'logo-badge.webp', tagline: 'Sent by email', description: '' } : undefined; };
 const basketItem = id => { const c = Number(String(id).split('-')[1]); return c > 0 ? { id, name: 'Holiday basket', price: c / 100, category: 'basket', image: 'studio-cookies.webp', tagline: '', description: '' } : undefined; };
-const byId = id => products.find(p => p.id === id) || (String(id).startsWith('egift-') ? giftItem(id) : String(id).startsWith('hbasket-') ? basketItem(id) : undefined);
+const holidayItems = window.AEM_HOLIDAY_ITEMS || (window.AEM_HOLIDAY_ITEMS = []);
+const byId = id => products.find(p => p.id === id) || holidayItems.find(p => p.id === id) || (String(id).startsWith('egift-') ? giftItem(id) : String(id).startsWith('hbasket-') ? basketItem(id) : undefined);
 const money = v => '$' + Number(v).toFixed(2);
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const img = p => /^(https?:|data:)/.test(p.image || '') ? p.image : 'assets/' + p.image;
@@ -67,11 +68,11 @@ function renderCart() {
   $$('[data-cart-subtotal]').forEach(el => el.textContent = money(cartTotal()));
   const list = $('[data-cart-items]');
   if (list) {
-    list.innerHTML = cart.length ? cart.map(l => lineHTML(l)).join('') : `<li class="cart-empty"><img src="assets/studio-cookies.webp" alt=""><strong>Your order is empty</strong>Fresh bakes are a tap away.<br><a class="btn" href="/shop">Browse the shop</a></li>`;
+    list.innerHTML = cart.length ? cart.map(l => lineHTML(l)).join('') : `<li class="cart-empty"><img src="assets/studio-cookies.webp" alt=""><strong>Your order is empty</strong>Fresh bakes are a tap away.<br><a class="btn" href="shop.html">Browse the shop</a></li>`;
     $('[data-cart-foot]').hidden = !cart.length;
   }
   const summary = $('[data-summary-items]');
-  if (summary) summary.innerHTML = cart.length ? cart.map(l => lineHTML(l)).join('') : `<li class="cart-empty"><strong>Your order is empty</strong><a class="btn" href="/shop">Browse the shop</a></li>`;
+  if (summary) summary.innerHTML = cart.length ? cart.map(l => lineHTML(l)).join('') : `<li class="cart-empty"><strong>Your order is empty</strong><a class="btn" href="shop.html">Browse the shop</a></li>`;
   const place = $('[data-place-order]'); if (place) place.disabled = !cart.length;
 }
 document.addEventListener('click', e => {
@@ -110,7 +111,7 @@ function closePanels(restore = true) {
   if (restore && lastFocus) lastFocus.focus?.({ preventScroll: true });
 }
 document.addEventListener('click', e => {
-  if (e.target.closest('[data-open-cart]')) { e.preventDefault(); hideToast(); if (location.pathname.endsWith('/checkout')) return; openPanel(cartEl); }
+  if (e.target.closest('[data-open-cart]')) { e.preventDefault(); hideToast(); if (location.pathname.endsWith('checkout.html')) return; openPanel(cartEl); }
   if (e.target.closest('[data-close-cart],[data-close-nav],[data-backdrop]')) closePanels();
 });
 menuBtn?.addEventListener('click', () => openPanel(navEl));
@@ -223,6 +224,10 @@ if (scroller) {
   $$('[data-scroll]').forEach(b => b.addEventListener('click', () => scroller.scrollBy({ left: Number(b.dataset.scroll) * scroller.clientWidth * .8, behavior: reduced.matches ? 'auto' : 'smooth' })));
 }
 
+/* holiday specials grid */
+const holGrid = $('[data-products="holiday"]');
+if (holGrid) { const drawHol = () => { holGrid.innerHTML = holidayItems.map(card).join('') || '<p class="empty">Holiday specials are coming soon.</p>'; }; drawHol(); live.push(drawHol); }
+
 /* shop */
 const shopGrid = $('[data-products="shop"]');
 if (shopGrid) {
@@ -271,9 +276,9 @@ function openProduct(id, trigger) {
         <button type="button" class="btn" data-pd-add="${p.id}">${ICON.bag}Add to order</button>
       </div>
       <ul class="pd-meta">
-        <li>${ICON.clock}<span>Baked fresh after we confirm your order. Allow at least ${CFG.leadTimeHours} hours.</span></li>
+        <li>${ICON.clock}<span>${p.category === 'holiday' ? 'Handmade in small batches for the holidays. Ready for pickup or delivery December 20–23.' : `Baked fresh after we confirm your order. Allow at least ${CFG.leadTimeHours} hours.`}</span></li>
         <li>${ICON.pin}<span>Pickup at ${esc(CFG.pickupAddress || 'Ramsey, Minnesota')}.</span></li>
-        <li>${ICON.card}<span>Secure online payment at checkout. Allergy questions? <a class="link" href="/contact">Ask us first</a>.</span></li>
+        <li>${ICON.card}<span>Secure online payment at checkout. Allergy questions? <a class="link" href="contact.html">Ask us first</a>.</span></li>
       </ul>
     </div></div>`;
   dialog.showModal();
@@ -306,9 +311,9 @@ const checkoutForm = $('#checkout-form');
 if (checkoutForm) {
   const date = $('#pickup-date');
   const iso = d => new Date(d.getTime() - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 10);
-  const hasBasket = () => cart.some(l => l.id.startsWith('hbasket-'));
+  const hasBasket = () => cart.some(l => l.id.startsWith('hbasket-') || byId(l.id)?.category === 'holiday');
   /* prep time grows with order size (rules set in the dashboard) */
-  const bakeCount = () => cart.filter(l => !l.id.startsWith('egift-') && !l.id.startsWith('hbasket-')).reduce((n, l) => n + l.qty, 0);
+  const bakeCount = () => cart.filter(l => !l.id.startsWith('egift-') && !l.id.startsWith('hbasket-') && byId(l.id)?.category !== 'holiday').reduce((n, l) => n + l.qty, 0);
   const prepHours = () => { const n = bakeCount(); let h = Number(CFG.leadTimeHours) || 6; (CFG.prepTiers || []).forEach(t => { if (n > Number(t.items)) h = Math.max(h, Number(t.hours) || 0); }); return h; };
   const fmtLong = d => new Date(d + 'T12:00').toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric' });
   const syncDate = () => {
@@ -317,7 +322,8 @@ if (checkoutForm) {
     date.min = minIso;
     if (!date.value || date.value < minIso) date.value = h <= 24 && minIso === iso(new Date()) ? iso(new Date(Date.now() + 864e5)) : minIso;
     const hint = $('[data-prep-hint]');
-    if (hasBasket()) { if (date.value < '2026-12-20') date.value = '2026-12-20'; if (hint) hint.textContent = 'Holiday baskets are ready December 20–23.'; }
+    date.max = '';
+    if (hasBasket()) { date.min = '2026-12-20'; date.max = '2026-12-23'; if (date.value < '2026-12-20' || date.value > '2026-12-23') date.value = '2026-12-20'; if (hint) hint.textContent = 'Holiday orders are ready December 20–23.'; }
     else if (hint) { const big = h > (Number(CFG.leadTimeHours) || 6); hint.textContent = big ? `Your order has ${bakeCount()} bakes, so we need ${h >= 24 && h % 24 === 0 ? (h / 24) + (h === 24 ? ' day’s' : ' days’') : h + ' hours’'} notice. The earliest date is ${fmtLong(minIso)}.` : `Everything is baked fresh, so we need at least ${h} hours’ notice.`; }
     const r = $('[data-co-ready]');
     if (r && date.value) { const w = checkoutForm.pickup_window?.value || ''; const del = checkoutForm.fulfilment.value === 'Delivery'; r.hidden = false; r.innerHTML = `${ICON.clock || ''}<span>Your order will be ${del ? 'delivered' : 'ready for pickup'} <b>${fmtLong(date.value)}${w ? ', ' + esc(w.split(' (')[0].toLowerCase()) + ' ' + esc((w.match(/\((.*)\)/) || [])[1] || '') : ''}</b>.</span>`; }
@@ -335,7 +341,7 @@ if (checkoutForm) {
   const grand = () => cartTotal() + (deliveryFee() || 0);
   const items = $('[data-co-items]');
   const drawSummary = () => {
-    items.innerHTML = cart.length ? cart.map(l => { const p = byId(l.id); return `<li><span class="co-thumb"><img src="${img(p)}" alt=""><b>${l.qty}</b></span><span class="co-item-t"><strong>${esc(p.name)}</strong>${l.opt ? `<small>${esc(l.opt)}</small>` : ''}</span><span class="co-item-p">${money(p.price * l.qty)}</span></li>`; }).join('') : `<li class="co-empty">Your cart is empty. <a class="link" href="/shop">Browse the bakes</a></li>`;
+    items.innerHTML = cart.length ? cart.map(l => { const p = byId(l.id); return `<li><span class="co-thumb"><img src="${img(p)}" alt=""><b>${l.qty}</b></span><span class="co-item-t"><strong>${esc(p.name)}</strong>${l.opt ? `<small>${esc(l.opt)}</small>` : ''}</span><span class="co-item-p">${money(p.price * l.qty)}</span></li>`; }).join('') : `<li class="co-empty">Your cart is empty. <a class="link" href="shop.html">Browse the bakes</a></li>`;
     $('[data-place-order]').disabled = !cart.length;
     const fee = deliveryFee(), zs = zones();
     $('[data-co-ship-label]').textContent = isDelivery() ? 'Delivery' : 'Pickup';
@@ -353,7 +359,7 @@ if (checkoutForm) {
     if (!isDelivery() || !zones().length) { zipMsg.textContent = ''; checkoutForm.zip.setCustomValidity(''); return; }
     const v = checkoutForm.zip.value, z = zoneFor(v);
     if (z === undefined) { checkoutForm.zip.setCustomValidity(v ? 'zip' : ''); zipMsg.textContent = ''; zipMsg.className = 'field-msg'; }
-    else if (z === null) { checkoutForm.zip.setCustomValidity('nozone'); zipMsg.className = 'field-msg bad'; zipMsg.innerHTML = 'Sorry, we don’t deliver to this ZIP code yet. Choose pickup, or <a class="link" href="/contact">ask us</a>.'; if (final) checkoutForm.zip.closest('.field')?.classList.add('bad'); }
+    else if (z === null) { checkoutForm.zip.setCustomValidity('nozone'); zipMsg.className = 'field-msg bad'; zipMsg.innerHTML = 'Sorry, we don’t deliver to this ZIP code yet. Choose pickup, or <a class="link" href="contact.html">ask us</a>.'; if (final) checkoutForm.zip.closest('.field')?.classList.add('bad'); }
     else { checkoutForm.zip.setCustomValidity(''); zipMsg.className = 'field-msg ok'; const free = CFG.freeDeliveryOver && cartTotal() >= CFG.freeDeliveryOver; zipMsg.textContent = `We deliver here: ${free ? 'free delivery' : money(z.fee) + ' delivery'}.`; checkoutForm.zip.closest('.field')?.classList.remove('bad'); }
   };
   const syncFulfil = () => {
@@ -377,7 +383,7 @@ if (checkoutForm) {
   // validate each field when the customer leaves it
   checkoutForm.addEventListener('focusout', e => { const f = e.target; if (f.matches('input,select,textarea') && f.value) f.closest('.field')?.classList.toggle('bad', !f.checkValidity()); });
   checkoutForm.addEventListener('input', e => { const fld = e.target.closest('.field'); if (fld?.classList.contains('bad') && e.target.checkValidity()) fld.classList.remove('bad'); });
-  const msgFor = f => ({ email: 'Enter a valid email, like name@example.com.', name: 'Enter your full name.', phone: 'Enter a phone number.', address: 'Enter your street address.', city: 'Enter your city.', zip: f.validationMessage === 'nozone' ? 'Sorry, we don’t deliver to that ZIP code yet. Choose pickup or contact us.' : 'Enter a 5-digit ZIP code.', pickup_date: f.value && f.value < f.min ? `For this order, the earliest date is ${fmtLong(f.min)}.` : 'Choose a date.' })[f.name] || 'Please complete this field.';
+  const msgFor = f => ({ email: 'Enter a valid email, like name@example.com.', name: 'Enter your full name.', phone: 'Enter a phone number.', address: 'Enter your street address.', city: 'Enter your city.', zip: f.validationMessage === 'nozone' ? 'Sorry, we don’t deliver to that ZIP code yet. Choose pickup or contact us.' : 'Enter a 5-digit ZIP code.', pickup_date: f.value && f.max && f.value > f.max ? 'Holiday orders are ready December 20–23. Choose one of those dates.' : f.value && f.value < f.min ? `For this order, the earliest date is ${fmtLong(f.min)}.` : 'Choose a date.' })[f.name] || 'Please complete this field.';
   checkoutForm.addEventListener('submit', async e => {
     e.preventDefault(); clearError(checkoutForm);
     if (!cart.length) return showError(checkoutForm, 'Your cart is empty. Add a bake from the shop first.');
@@ -413,7 +419,7 @@ if (checkoutForm) {
     if (CFG.paymentUrl) { store.session('aem-last-order', record); cart = []; saveCart(); location.href = CFG.paymentUrl.replace('{ref}', encodeURIComponent(ref)).replace('{total}', total.toFixed(2)); return; }
     store.session('aem-last-order', record);
     cart = []; saveCart();
-    setTimeout(() => { location.href = '/order-confirmed'; }, record.via === 'email' ? 900 : 0);
+    setTimeout(() => { location.href = 'order-confirmed.html'; }, record.via === 'email' ? 900 : 0);
   });
 }
 
@@ -476,11 +482,13 @@ if (bb) {
   const basePrice = () => Number(CFG.basketPrice ?? 5);
   const capacity = () => Number(CFG.basketCapacity) || 0;
   const KEY = 'aem-baskets-v2';
+  const items = () => [...holidayItems, ...products.filter(p => p.inBasket)];
+  const hById = id => items().find(p => p.id === id);
   let baskets = store.get(KEY, null) || [{ label: '', items: {} }];
   let cur = 0, filter = 'all';
   const save = () => store.set(KEY, baskets);
   const count = b => Object.values(b.items).reduce((n, q) => n + q, 0);
-  const totalOf = b => basePrice() + Object.entries(b.items).reduce((t, [id, q]) => t + (byId(id)?.price || 0) * q, 0);
+  const totalOf = b => basePrice() + Object.entries(b.items).reduce((t, [id, q]) => t + (hById(id)?.price || 0) * q, 0);
   const title = b => b.label.trim() ? `For ${b.label.trim()}` : 'Your basket';
   const BASKET_IC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 10h16l-1.6 9H5.6L4 10Z"/><path d="m8 10 3-6M16 10l-3-6"/></svg>';
   const $b = s => bb.querySelector(s);
@@ -492,8 +500,8 @@ if (bb) {
     tabs.innerHTML = (baskets.length > 1 ? baskets.map((x, i) => `<button type="button" role="tab" class="bb-tab${i === cur ? ' on' : ''}" aria-selected="${i === cur}" data-bb-go="${i}"><span class="bb-ic">${BASKET_IC}</span><span class="bb-tab-t">${esc(title(x))}<small>${count(x)} ${count(x) === 1 ? 'item' : 'items'}</small></span></button>`).join('') : '') + `<button type="button" class="bb-tab bb-tab--add" data-bb-new><span class="bb-plus">+</span>Add another basket</button>`;
     const on = tabs.querySelector('.bb-tab.on'); if (on) tabs.scrollTo({ left: on.offsetLeft - 16, behavior: reduced.matches ? 'auto' : 'smooth' });
     $b('[data-bb-label]').value = b.label;
-    $b('[data-bb-list]').innerHTML = products.filter(p => filter === 'all' || p.category === filter).map(p => { const q = b.items[p.id] || 0; return `<li class="bb-item${q ? ' on' : ''}"><img src="${img(p)}" alt="" loading="lazy"><div><strong>${esc(p.name)}</strong><span>${money(p.price)}</span></div><div class="qty qty--sm"><button type="button" data-bb-q="${p.id}" data-d="-1" aria-label="One fewer ${esc(p.name)}"${q ? '' : ' disabled'}>${ICON.minus}</button><output>${q}</output><button type="button" data-bb-q="${p.id}" data-d="1" aria-label="One more ${esc(p.name)}">${ICON.plus}</button></div></li>`; }).join('');
-    $b('[data-bb-all]').innerHTML = baskets.map((x, i) => { const ent = Object.entries(x.items).filter(([id]) => byId(id)); return `<li class="${i === cur ? 'on' : ''}"><div class="bb-all-head"><button type="button" data-bb-go="${i}">${esc(title(x))}</button><span>${money(totalOf(x))}</span></div><p>${ent.length ? ent.map(([id, q]) => `${q} × ${esc(byId(id).name)}`).join(', ') : '<em>Empty — tap + on any bake</em>'}</p>${baskets.length > 1 ? `<button type="button" class="bb-remove" data-bb-del="${i}">Remove</button>` : ''}</li>`; }).join('');
+    $b('[data-bb-list]').innerHTML = [...holidayItems.map(p => [p, holidayItems[0] === p ? 'Holiday specials' : '']), ...products.filter(p => p.inBasket).map((p, i) => [p, i === 0 ? 'Favorites from the bakery' : ''])].map(([p, head]) => { const q = b.items[p.id] || 0; return `${head ? `<li class="bb-group">${head}</li>` : ''}<li class="bb-item${q ? ' on' : ''}"><img src="${img(p)}" alt="" loading="lazy"><div><strong>${esc(p.name)}</strong>${p.tagline ? `<small>${esc(p.tagline)}</small>` : ''}<span>${money(p.price)}</span></div><div class="qty qty--sm"><button type="button" data-bb-q="${p.id}" data-d="-1" aria-label="One fewer ${esc(p.name)}"${q ? '' : ' disabled'}>${ICON.minus}</button><output>${q}</output><button type="button" data-bb-q="${p.id}" data-d="1" aria-label="One more ${esc(p.name)}">${ICON.plus}</button></div></li>`; }).join('') || '<li class="bb-none">Holiday basket items are coming soon. Check back shortly, or <a class="link" href="contact.html">ask us</a>.</li>';
+    $b('[data-bb-all]').innerHTML = baskets.map((x, i) => { const ent = Object.entries(x.items).filter(([id]) => hById(id)); return `<li class="${i === cur ? 'on' : ''}"><div class="bb-all-head"><button type="button" data-bb-go="${i}">${esc(title(x))}</button><span>${money(totalOf(x))}</span></div><p>${ent.length ? ent.map(([id, q]) => `${q} × ${esc(hById(id).name)}`).join(', ') : '<em>Empty. Tap + on any item.</em>'}</p>${baskets.length > 1 ? `<button type="button" class="bb-remove" data-bb-del="${i}">Remove</button>` : ''}</li>`; }).join('');
     const cap = capacity(), c = count(b);
     $b('[data-bb-cap]').hidden = !cap;
     if (cap) {
@@ -522,18 +530,17 @@ if (bb) {
     const go = e.target.closest('[data-bb-go]'); if (go) { cur = Number(go.dataset.bbGo); draw(); return; }
     if (e.target.closest('[data-bb-new]')) { baskets.push({ label: '', items: {} }); cur = baskets.length - 1; draw(); setTimeout(() => $b('[data-bb-label]').focus({ preventScroll: true }), 50); bb.scrollIntoView({ block: 'start', behavior: reduced.matches ? 'auto' : 'smooth' }); return; }
     const del = e.target.closest('[data-bb-del]'); if (del) { baskets.splice(Number(del.dataset.bbDel), 1); cur = Math.min(cur, baskets.length - 1); draw(); return; }
-    const f = e.target.closest('[data-bb-filter]'); if (f) { filter = f.dataset.bbFilter; $$('[data-bb-filter]', bb).forEach(x => x.setAttribute('aria-pressed', x === f)); draw(); return; }
     if (e.target.closest('[data-bb-add]')) {
       const ready = baskets.filter(x => count(x));
       if (!ready.length) { err.textContent = 'Add at least one bake to your basket first.'; err.classList.add('show'); return; }
-      ready.forEach(x => { const i = baskets.indexOf(x); const desc = Object.entries(x.items).map(([id, q]) => `${q} × ${byId(id).name}`).join(', '); addToCart('hbasket-' + Math.round(totalOf(x) * 100), 1, `Basket ${i + 1}${x.label.trim() ? ' for ' + x.label.trim() : ''}: ${desc}`, { silent: true }); });
+      ready.forEach(x => { const i = baskets.indexOf(x); const desc = Object.entries(x.items).map(([id, q]) => `${q} × ${hById(id).name}`).join(', '); addToCart('hbasket-' + Math.round(totalOf(x) * 100), 1, `Basket ${i + 1}${x.label.trim() ? ' for ' + x.label.trim() : ''}: ${desc}`, { silent: true }); });
       toast(ready.length > 1 ? `${ready.length} holiday baskets added` : 'Holiday basket added', { image: 'assets/studio-cookies.webp', sub: money(ready.reduce((t, x) => t + totalOf(x), 0)) });
       baskets = [{ label: '', items: {} }]; cur = 0; draw();
       $b('[data-bb-checkout]').hidden = false;
     }
   });
   $b('[data-bb-label]').addEventListener('input', e => { baskets[cur].label = e.target.value; const t = bb.querySelector('.bb-all li.on .bb-all-head button'); if (t) t.textContent = title(baskets[cur]); const tt = bb.querySelector('.bb-tab.on .bb-tab-t'); if (tt) tt.firstChild.textContent = title(baskets[cur]); save(); });
-  draw(); live.push(() => { baskets.forEach(x => Object.keys(x.items).forEach(id => { if (!byId(id)) delete x.items[id]; })); draw(); });
+  draw(); live.push(() => { baskets.forEach(x => Object.keys(x.items).forEach(id => { if (!hById(id)) delete x.items[id]; })); draw(); });
 }
 
 /* ---------------- eGift Cards page ---------------- */
@@ -555,7 +562,7 @@ if (gf) {
     if (!gf.checkValidity()) { showError(gf, 'Please add the recipient’s name and email, and your name.'); gf.querySelector(':invalid')?.focus(); return; }
     const opt = `To ${gf.to_name.value.trim()} (${gf.to_email.value.trim()}) from ${gf.from_name.value.trim()}${gf.note.value.trim() ? ' — “' + gf.note.value.trim() + '”' : ''}`;
     addToCart('egift-' + a, Math.max(1, parseInt(gf.qty.value, 10) || 1), opt);
-    if (action === 'buy') location.href = '/checkout';
+    if (action === 'buy') location.href = 'checkout.html';
     else { gf.reset(); gf.querySelector('input[value="50"]').checked = true; sync(); }
   });
 }
@@ -586,7 +593,7 @@ if(hero){const slides=[
  {word:'sweetness.',description:'Golden edges. Chocolate chips. A little toffee crunch.',name:'Chocolate chip toffee cookies',category:'A LITTLE COOKIE HAPPINESS',price:'$3',slug:'chocolate-chip-toffee-cookies',background:'#FFF9EF',accent:'#a16e42'},
  {word:'comfort.',description:'Golden crust. Soft centers. Simply homemade.',name:'Mini French baguettes',category:'GOOD BREAD. GOOD COMPANY.',price:'$8',slug:'mini-french-baguettes',background:'#E7F0F6',accent:'#5b8ea8'},
  {word:'joy.',description:'Brown butter banana cake. Caramel cream cheese frosting.',name:'Brown butter banana cake',category:'MAKE A LITTLE MOMENT OF IT',price:'$15',slug:'brown-butter-banana-cake-with-caramel-cream-cheese-frosting',background:'#F8F2E7',accent:'#a27268'}
-];let active=0,timer=null,paused=reduced.matches;const mobile=window.matchMedia('(max-width:700px)');function setSlide(index){active=(index+slides.length)%slides.length;const s=slides[active];$('#hero-description').textContent=s.description;$('#hero-name').textContent=s.name;$('#hero-price').textContent=s.price;$('#hero-order').href='/shop#item-'+s.slug;hero.style.setProperty('--hero-bg',s.background);hero.dataset.activeSlide=String(active);$('.orbit-pointer').style.transform=`rotate(${(mobile.matches?[-40,-18,18,40]:[-56,-18,18,56])[active]}deg)`;$$('.hero-product').forEach((img,i)=>{img.classList.toggle('active',i===active);img.setAttribute('aria-hidden',i!==active)});$$('[data-slide]').forEach((button,i)=>{button.classList.toggle('selected',i===active);button.setAttribute('aria-pressed',i===active)});$('#slide-count').innerHTML=`0${active+1} <i>/ 04</i>`;}function restart(){clearInterval(timer);if(!paused&&!document.hidden&&!hero.contains(document.activeElement))timer=setInterval(()=>setSlide(active+1),7500)}function change(delta){setSlide(active+delta);restart()}function updatePause(){const b=$('#pause');b.innerHTML=paused?'<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 10 7-10 7V5Z"/></svg>':'<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M9 6v12M15 6v12"/></svg>';b.setAttribute('aria-label',paused?'Play slideshow':'Pause slideshow');b.setAttribute('aria-pressed',paused)}$$('[data-slide]').forEach(button=>{button.addEventListener('click',()=>{setSlide(Number(button.dataset.slide));restart()});button.addEventListener('keydown',event=>{if(event.key==='ArrowRight'||event.key==='ArrowLeft'){event.preventDefault();change(event.key==='ArrowRight'?1:-1);$$('[data-slide]')[active].focus()}})});$('#prev').addEventListener('click',()=>change(-1));$('#next').addEventListener('click',()=>change(1));$('#pause').addEventListener('click',()=>{paused=!paused;updatePause();restart()});hero.addEventListener('focusin',()=>clearInterval(timer));hero.addEventListener('focusout',event=>{if(!hero.contains(event.relatedTarget))restart()});document.addEventListener('visibilitychange',restart);mobile.addEventListener('change',()=>setSlide(active));reduced.addEventListener('change',()=>{paused=reduced.matches;updatePause();restart()});setSlide(0);updatePause();restart();}
+];let active=0,timer=null,paused=reduced.matches;const mobile=window.matchMedia('(max-width:700px)');function setSlide(index){active=(index+slides.length)%slides.length;const s=slides[active];$('#hero-description').textContent=s.description;$('#hero-name').textContent=s.name;$('#hero-price').textContent=s.price;$('#hero-order').href='shop.html#item-'+s.slug;hero.style.setProperty('--hero-bg',s.background);hero.dataset.activeSlide=String(active);$('.orbit-pointer').style.transform=`rotate(${(mobile.matches?[-40,-18,18,40]:[-56,-18,18,56])[active]}deg)`;$$('.hero-product').forEach((img,i)=>{img.classList.toggle('active',i===active);img.setAttribute('aria-hidden',i!==active)});$$('[data-slide]').forEach((button,i)=>{button.classList.toggle('selected',i===active);button.setAttribute('aria-pressed',i===active)});$('#slide-count').innerHTML=`0${active+1} <i>/ 04</i>`;}function restart(){clearInterval(timer);if(!paused&&!document.hidden&&!hero.contains(document.activeElement))timer=setInterval(()=>setSlide(active+1),7500)}function change(delta){setSlide(active+delta);restart()}function updatePause(){const b=$('#pause');b.innerHTML=paused?'<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 10 7-10 7V5Z"/></svg>':'<svg class="ui-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M9 6v12M15 6v12"/></svg>';b.setAttribute('aria-label',paused?'Play slideshow':'Pause slideshow');b.setAttribute('aria-pressed',paused)}$$('[data-slide]').forEach(button=>{button.addEventListener('click',()=>{setSlide(Number(button.dataset.slide));restart()});button.addEventListener('keydown',event=>{if(event.key==='ArrowRight'||event.key==='ArrowLeft'){event.preventDefault();change(event.key==='ArrowRight'?1:-1);$$('[data-slide]')[active].focus()}})});$('#prev').addEventListener('click',()=>change(-1));$('#next').addEventListener('click',()=>change(1));$('#pause').addEventListener('click',()=>{paused=!paused;updatePause();restart()});hero.addEventListener('focusin',()=>clearInterval(timer));hero.addEventListener('focusout',event=>{if(!hero.contains(event.relatedTarget))restart()});document.addEventListener('visibilitychange',restart);mobile.addEventListener('change',()=>setSlide(active));reduced.addEventListener('change',()=>{paused=reduced.matches;updatePause();restart()});setSlide(0);updatePause();restart();}
 
 
 /* hero "Order now": buy on this site instead of leaving for the old store */

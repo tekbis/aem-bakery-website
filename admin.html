@@ -6,9 +6,7 @@
 <meta name="robots" content="noindex,nofollow">
 <meta name="theme-color" content="#ffffff">
 <title>Dashboard | AEM Bakery</title>
-<link rel="icon" href="favicon.ico" sizes="any">
-<link rel="icon" href="assets/favicon-32.png" type="image/png" sizes="32x32">
-<link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+<link rel="icon" href="assets/logo.png" type="image/png">
 <link rel="preload" href="assets/fonts/dm-sans-latin-wght-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="admin.css">
 <script defer src="products.js"></script>
@@ -69,7 +67,7 @@
 
 <div class="app" id="app" hidden>
   <aside class="side" aria-label="Dashboard">
-    <a class="brand" href="/" target="_blank" rel="noopener" data-site-link><img src="assets/logo-badge.webp" alt="" width="40" height="39"><span><b>AEM Bakery</b><small>Dashboard</small></span></a>
+    <a class="brand" href="index.html" target="_blank" rel="noopener" data-site-link><img src="assets/logo-badge.webp" alt="" width="40" height="39"><span><b>AEM Bakery</b><small>Dashboard</small></span></a>
     <nav class="nav">
       <button data-tab="home"><svg><use href="#i-home"/></svg><span>Home</span></button>
       <button data-tab="orders"><svg><use href="#i-orders"/></svg><span>Orders</span><b class="badge" data-new-count hidden>0</b></button>
@@ -79,7 +77,7 @@
     </nav>
     <div class="side-foot">
       <button class="store-state" data-store-toggle><i></i><span data-store-label>Taking orders</span></button>
-      <a href="/" target="_blank" rel="noopener" data-site-link><svg><use href="#i-ext"/></svg>View website</a>
+      <a href="index.html" target="_blank" rel="noopener" data-site-link><svg><use href="#i-ext"/></svg>View website</a>
       <button data-signout><svg><use href="#i-out"/></svg>Sign out</button>
     </div>
   </aside>
@@ -87,7 +85,7 @@
   <header class="mtop">
     <img src="assets/logo-badge.webp" alt="" width="34" height="33">
     <strong data-mtitle>Home</strong>
-    <a class="icon-btn" href="/" target="_blank" rel="noopener" data-site-link aria-label="View website"><svg><use href="#i-ext"/></svg></a>
+    <a class="icon-btn" href="index.html" target="_blank" rel="noopener" data-site-link aria-label="View website"><svg><use href="#i-ext"/></svg></a>
   </header>
 
   <main class="main" id="main">
@@ -222,12 +220,13 @@
       <label class="fld">Name<input name="name" required maxlength="80"></label>
       <div class="two">
         <label class="fld">Price<span class="unit pre"><em>$</em><input name="price" type="number" min="0" step="0.01" required inputmode="decimal"></span></label>
-        <label class="fld">Category<select name="category"></select></label>
+        <label class="fld">Category<select name="category"></select><small class="help" data-cat-help></small></label>
       </div>
       <label class="fld">Short line<input name="tagline" maxlength="90" placeholder="e.g. Soft, gooey and frosted"><small class="help">Shown under the name on the shop page.</small></label>
       <label class="fld">Description<textarea name="description" rows="4" maxlength="600"></textarea></label>
       <label class="fld">Label<input name="badge" maxlength="24" placeholder="e.g. Bestseller"><small class="help">Optional small tag on the photo.</small></label>
       <label class="switch-row"><span><b>Frosting choice</b><small>Customers pick warm, cooled or no frosting.</small></span><span class="switch"><input type="checkbox" name="has_frosting_options"><i></i></span></label>
+      <label class="switch-row" data-basket-row><span><b>Also in holiday baskets</b><small>Customers can add it when building a holiday basket.</small></span><span class="switch"><input type="checkbox" name="in_basket"><i></i></span></label>
       <label class="switch-row"><span><b>On the menu</b><small>Off hides it from the website.</small></span><span class="switch"><input type="checkbox" name="active"><i></i></span></label>
       <div class="alert bad" data-prod-error hidden></div>
     </div>

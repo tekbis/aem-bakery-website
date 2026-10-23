@@ -742,9 +742,6 @@ html{scroll-padding-top:calc(var(--header-h-scrolled) + 24px)}
 .ft-col address a{display:inline;padding:0}
 .nw{white-space:nowrap}
 .site-footer .footer-base{font-size:var(--fs-xs);color:#a9bccf;padding-block:18px}
-.site-footer .credit{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;text-decoration:none}
-.site-footer .credit:hover{color:#fff}
-.site-footer .credit img{height:18px;width:auto;display:block}
 .footer-watermark{font-size:clamp(2.6rem,9vw,7rem);margin-top:0}
 @media(max-width:820px){.ft{grid-template-columns:1fr 1fr;gap:26px 20px;padding-block:40px 26px}.ft-brand{grid-column:1/-1;display:flex;align-items:center;gap:14px}.ft-brand img{width:64px;margin:0}.ft-col:last-child{grid-column:1/-1}}
 @media(max-width:720px){.site-footer .footer-base{justify-content:center;text-align:center;flex-direction:column;gap:4px}}
@@ -1153,3 +1150,8 @@ html{scroll-padding-top:calc(var(--header-h) + 20px)}
   .co-summary::before{content:'';position:absolute;z-index:-1;top:-200vh;bottom:-200vh;left:calc(clamp(28px,5vw,72px) / -2);width:100vw;background:var(--frost-2);border-left:1px solid var(--line)}
   .co-summary{z-index:0}
 }
+.bb-item small{display:block;font-size:.78rem;color:var(--muted);line-height:1.3;margin:1px 0 2px}
+.bb-none{padding:20px;text-align:center;color:var(--muted);list-style:none}
+.bb-group{grid-column:1/-1;list-style:none;margin:10px 0 2px;font-size:.78rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.bb-group:first-child{margin-top:0}
+@media(min-width:1200px){[data-products="holiday"]{grid-template-columns:repeat(5,minmax(0,1fr))}}
